@@ -1,0 +1,18 @@
+.header {
+    height: 60px;
+    background-color: #1acedecf;
+    border-radius: 15px 15px 0 0;
+}
+
+#sidebar {
+    width: 200px;
+    border-right: #eee 1px solid;
+    min-height: calc(100vh - 60px);
+}
+
+#sidebar-body {
+    flex: 1;
+    width: 0;
+    background-color: #eff2f6;
+    padding: 5px;
+}
