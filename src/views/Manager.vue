@@ -1,7 +1,12 @@
 <template>
     <!-- 头部导航栏 -->
     <div class="header">
-
+        <div id="header-left">后台管理系统</div>
+        <div style="flex: 1;"></div>
+        <div id="header-right">
+            <img src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" alt="Logo"></img>
+            <span>管理员</span>
+        </div> 
     </div>
 
     <div style="display: flex;">

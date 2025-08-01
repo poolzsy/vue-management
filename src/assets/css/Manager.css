@@ -1,7 +1,9 @@
 .header {
     height: 60px;
     background-color: #1acedecf;
-    border-radius: 15px 15px 0 0;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    align-items: center;
 }
 
 #sidebar {
@@ -15,4 +17,27 @@
     width: 0;
     background-color: #eff2f6;
     padding: 5px;
+}
+.el-menu .is-active {
+    background-color: #dbf4f6cf;
+}
+#header-left { 
+    display: flex;
+    width: 200px;
+    align-items: center;
+    font-size: 30px;
+    color: #0f0f0f;
+    font-weight: 600;
+    padding-left: 20px;
+}
+#header-right {
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
+}
+img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
 }
