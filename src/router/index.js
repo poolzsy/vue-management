@@ -22,9 +22,9 @@ const router = createRouter({
           name: 'user',
           children: [
             {
-              path: 'normal',
-              name: 'normal',
-              component: () => import('../views/NomalUser.vue')
+              path: 'employee',
+              name: 'employee',
+              component: () => import('../views/Employee.vue')
             },
             {
               path: 'admin',

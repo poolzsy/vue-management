@@ -26,14 +26,22 @@
                         <el-icon><Avatar /></el-icon>
                         <span>管理员</span>
                     </el-menu-item>
-                    <el-menu-item index="/manager/user/normal">
+                    <el-menu-item index="/manager/user/employee">
                         <el-icon><UserFilled /></el-icon>
-                        <span>普通用户</span>
+                        <span>员工信息</span>
                     </el-menu-item>
                 </el-sub-menu>
+                <el-menu-item index="/manager/person">
+                    <el-icon><UserFilled /></el-icon>
+                    <span>个人信息</span>
+                </el-menu-item>
                 <el-menu-item index="/manager/data">
                     <el-icon><Grid /></el-icon>
                     <span>数据统计</span>
+                </el-menu-item>
+                <el-menu-item index="/manager/logout" @click="$router.push('/login')">
+                    <el-icon><SwitchButton /></el-icon>
+                    <span>退出登录</span>
                 </el-menu-item>
             </el-menu>
         </div>
