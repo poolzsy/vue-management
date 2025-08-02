@@ -39,7 +39,7 @@
                     <el-icon><Grid /></el-icon>
                     <span>数据统计</span>
                 </el-menu-item>
-                <el-menu-item index="/manager/logout" @click="$router.push('/login')">
+                <el-menu-item index="/login" @click="$router.push('/login')">
                     <el-icon><SwitchButton /></el-icon>
                     <span>退出登录</span>
                 </el-menu-item>
