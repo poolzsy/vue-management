@@ -48,8 +48,17 @@ const rules = {
 const login = () => {
     formRef.value.validate(valid => {
         if (valid) {
-            ElMessage.success('登录成功');
-            router.push('/manager');
+            request.post("/login", data.form).then(res => {
+                if (res.code === 200) {
+                    localStorage.setItem("token", res.data.token);
+                    ElMessage.success("登录成功");
+                    router.push("/manager/home");
+                } else {
+                    ElMessage.error(res.data.message || "登录失败，请重试");
+                }
+            }).catch(error => {
+                ElMessage.error("网络错误，请稍后再试");
+            });
         } else {
             ElMessage.error('请填写账号和密码');
         }
