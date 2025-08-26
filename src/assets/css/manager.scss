@@ -1,0 +1,150 @@
+$header-height: 60px;
+$sidebar-width: 200px;
+$sidebar-bg-color: #3a456b;
+$sidebar-text-color: #ddd;
+$menu-active-bg: #537bee;
+$menu-active-text: #fff;
+$menu-hover-bg: #7a9fff;
+
+.manager-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    height: $header-height;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e5e5e5;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    .header-logo {
+        width: $sidebar-width;
+        display: flex;
+        align-items: center;
+        padding-left: 20px;
+        background-color: $sidebar-bg-color;
+        height: 100%;
+
+        img {
+            height: 40px;
+        }
+
+        span {
+            font-size: 20px;
+            font-weight: bold;
+            margin-left: 5px;
+            color: #fff;
+        }
+    }
+
+    .header-center {
+        flex: 1;
+        padding: 0 20px;
+
+        .breadcrumb {
+            color: #666;
+        }
+    }
+
+    .header-user {
+        width: fit-content;
+        padding-right: 20px;
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            outline: none;
+
+            .user-avatar {
+                width: 40px;
+                border-radius: 50%;
+            }
+        }
+    }
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: $sidebar-width;
+    flex-shrink: 0;
+
+    .el-menu-vertical-custom {
+        height: 100%;
+        background-color: $sidebar-bg-color;
+        border: none;
+
+        :deep(.el-sub-menu__title),
+        :deep(.el-menu-item) {
+            color: $sidebar-text-color;
+            height: 50px;
+
+            &:hover {
+                background-color: $menu-hover-bg;
+                color: $menu-active-text;
+            }
+        }
+
+        :deep(.el-menu-item.is-active) {
+            background-color: $menu-active-bg;
+            color: $menu-active-text;
+        }
+
+        :deep(.el-menu--vertical>.el-menu>.el-menu-item) {
+            background-color: $sidebar-bg-color !important;
+            /* 使用sidebar的背景颜色,设置最高优先级*/
+            color: $sidebar-text-color !important;
+        }
+
+        :deep(.el-menu--vertical.el-menu>.el-sub-menu .el-menu-item) {
+            background-color: $sidebar-bg-color !important;
+            /* 使用sidebar的背景颜色,设置最高优先级*/
+            color: $sidebar-text-color !important;
+        }
+
+        // 关键代码：修改鼠标悬停时候的子菜单颜色
+        :deep(.el-menu--vertical>.el-menu>.el-menu-item:hover) {
+            background-color: $menu-hover-bg !important;
+            color: $menu-active-text !important;
+        }
+
+        :deep(.el-menu--vertical.el-menu>.el-sub-menu .el-menu-item:hover) {
+            background-color: $menu-hover-bg !important;
+            color: $menu-active-text !important;
+        }
+
+        //关键代码： 子菜单激活时候的颜色
+        :deep(.el-menu--vertical>.el-menu>.el-menu-item.is-active) {
+            background-color: $menu-active-bg !important;
+            color: $menu-active-text !important;
+        }
+
+        :deep(.el-menu--vertical.el-menu>.el-sub-menu .el-menu-item.is-active) {
+            background-color: $menu-active-bg !important;
+            color: $menu-active-text !important;
+        }
+
+        //确保el-sub-menu展开时的背景色也正确
+        :deep(.el-menu--vertical.el-menu>.el-sub-menu.is-opened) {
+            background-color: $sidebar-bg-color !important;
+        }
+    }
+}
+
+.content-view {
+    flex: 1;
+    width: 0;
+    padding: 10px;
+    background-color: #eeeef5;
+    overflow-y: auto;
+}
