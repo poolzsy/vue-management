@@ -1,15 +1,24 @@
 $header-height: 60px;
 $sidebar-width: 200px;
-$sidebar-bg-color: #3a456b;
-$sidebar-text-color: #ddd;
-$menu-active-bg: #537bee;
-$menu-active-text: #fff;
-$menu-hover-bg: #7a9fff;
+$content-padding: 20px;
+
+$color-brand-primary: #537bee; 
+$color-brand-hover: #7a9fff;  
+
+$color-sidebar-bg: #3a456b;
+$color-sidebar-text: #ddd;
+$color-sidebar-text-active: #fff;
+
+$color-content-bg: #f0f2f5; 
+$color-border: #e5e5e5;
+$color-shadow: rgba(0, 0, 0, 0.05);
+
 
 .manager-container {
     height: 100vh;
     display: flex;
     flex-direction: column;
+    background-color: $color-content-bg; 
 }
 
 .header {
@@ -17,17 +26,18 @@ $menu-hover-bg: #7a9fff;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #e5e5e5;
     background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-    .header-logo {
+    border-bottom: 1px solid $color-border;
+    box-shadow: 0 2px 4px $color-shadow;
+    flex-shrink: 0; 
+    &-logo {
         width: $sidebar-width;
+        height: 100%;
         display: flex;
         align-items: center;
-        padding-left: 20px;
-        background-color: $sidebar-bg-color;
-        height: 100%;
+        padding-left: $content-padding;
+        background-color: $color-sidebar-bg;
+        box-sizing: border-box;
 
         img {
             height: 40px;
@@ -36,23 +46,22 @@ $menu-hover-bg: #7a9fff;
         span {
             font-size: 20px;
             font-weight: bold;
-            margin-left: 5px;
-            color: #fff;
+            margin-left: 10px; 
+            color: $color-sidebar-text-active;
         }
     }
 
-    .header-center {
+    &-center {
         flex: 1;
-        padding: 0 20px;
+        padding: 0 $content-padding;
 
         .breadcrumb {
             color: #666;
         }
     }
 
-    .header-user {
-        width: fit-content;
-        padding-right: 20px;
+    &-user {
+        padding-right: $content-padding;
 
         .user-info {
             display: flex;
@@ -60,9 +69,15 @@ $menu-hover-bg: #7a9fff;
             gap: 10px;
             cursor: pointer;
             outline: none;
+            transition: opacity 0.2s ease; 
+
+            &:hover {
+                opacity: 0.8;
+            }
 
             .user-avatar {
                 width: 40px;
+                height: 40px; 
                 border-radius: 50%;
             }
         }
@@ -72,79 +87,57 @@ $menu-hover-bg: #7a9fff;
 .main-content {
     display: flex;
     flex: 1;
-    overflow: hidden;
+    overflow: hidden; 
 }
 
 .sidebar {
     width: $sidebar-width;
     flex-shrink: 0;
+    background-color: $color-sidebar-bg; 
 
     .el-menu-vertical-custom {
         height: 100%;
-        background-color: $sidebar-bg-color;
-        border: none;
+        background-color: transparent;
+        border-right: none; 
 
-        :deep(.el-sub-menu__title),
-        :deep(.el-menu-item) {
-            color: $sidebar-text-color;
+        :deep(.el-menu-item),
+        :deep(.el-sub-menu__title) {
+            color: $color-sidebar-text;
             height: 50px;
 
             &:hover {
-                background-color: $menu-hover-bg;
-                color: $menu-active-text;
+                background-color: $color-brand-hover;
+                color: $color-sidebar-text-active;
             }
         }
-
+        
         :deep(.el-menu-item.is-active) {
-            background-color: $menu-active-bg;
-            color: $menu-active-text;
+            background-color: $color-brand-primary;
+            color: $color-sidebar-text-active;
         }
 
-        :deep(.el-menu--vertical>.el-menu>.el-menu-item) {
-            background-color: $sidebar-bg-color !important;
-            /* 使用sidebar的背景颜色,设置最高优先级*/
-            color: $sidebar-text-color !important;
-        }
+        :deep(.el-menu .el-menu-item) {
+            background-color: $color-sidebar-bg !important;
+            color: $color-sidebar-text !important;
 
-        :deep(.el-menu--vertical.el-menu>.el-sub-menu .el-menu-item) {
-            background-color: $sidebar-bg-color !important;
-            /* 使用sidebar的背景颜色,设置最高优先级*/
-            color: $sidebar-text-color !important;
-        }
+            &:hover {
+                background-color: $color-brand-hover !important;
+                color: $color-sidebar-text-active !important;
+            }
 
-        // 关键代码：修改鼠标悬停时候的子菜单颜色
-        :deep(.el-menu--vertical>.el-menu>.el-menu-item:hover) {
-            background-color: $menu-hover-bg !important;
-            color: $menu-active-text !important;
-        }
-
-        :deep(.el-menu--vertical.el-menu>.el-sub-menu .el-menu-item:hover) {
-            background-color: $menu-hover-bg !important;
-            color: $menu-active-text !important;
-        }
-
-        //关键代码： 子菜单激活时候的颜色
-        :deep(.el-menu--vertical>.el-menu>.el-menu-item.is-active) {
-            background-color: $menu-active-bg !important;
-            color: $menu-active-text !important;
-        }
-
-        :deep(.el-menu--vertical.el-menu>.el-sub-menu .el-menu-item.is-active) {
-            background-color: $menu-active-bg !important;
-            color: $menu-active-text !important;
-        }
-
-        //确保el-sub-menu展开时的背景色也正确
-        :deep(.el-menu--vertical.el-menu>.el-sub-menu.is-opened) {
-            background-color: $sidebar-bg-color !important;
+            &.is-active {
+                background-color: $color-brand-primary !important;
+                color: $color-sidebar-text-active !important;
+            }
         }
     }
 }
 
 .content-view {
     flex: 1;
-    width: 0;
-    padding: 10px;
-    background-color: #eeeef5;
-    overflow-y: auto;
+    width: 0; 
+    padding: $content-padding;
+    box-sizing: border-box; 
+    overflow-y: auto; 
 }
+

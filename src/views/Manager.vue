@@ -8,7 +8,7 @@
             </div>
 
             <div class="header-center">
-                <div class="breadcrumb">首页 / 数据分析</div>
+                <div class="breadcrumb">首页 / {{ router.currentRoute.value.meta.name }}</div>
             </div>
 
             <div class="header-user">
@@ -33,7 +33,7 @@
         <div class="main-content">
             <!-- 侧边栏菜单 -->
             <aside class="sidebar">
-                <el-menu default-active="/home" class="el-menu-vertical-custom">
+                <el-menu :default-active="$route.path" :router="true" class="el-menu-vertical-custom">
                     <el-menu-item index="/home">
                         <el-icon>
                             <House />
@@ -45,9 +45,9 @@
                             <el-icon>
                                 <Location />
                             </el-icon>
-                            <span>数据管理</span>
+                            <span>用户管理</span>
                         </template>
-                        <el-menu-item index="1-1">子菜单 1</el-menu-item>
+                        <el-menu-item index="/admin">管理员列表</el-menu-item>
                     </el-sub-menu>
                 </el-menu>
             </aside>
@@ -61,6 +61,7 @@
 </template>
 
 <script setup>
+import router from "@/router/index.js";
 </script>
 
 <style lang="scss" scoped>

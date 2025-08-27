@@ -13,7 +13,18 @@ const router = createRouter({
           path: 'home',
           name: 'home',
           component: () => import('../views/Home.vue'),
+          meta: {
+            name: '主页'
+          }
         },
+        {
+          path: 'admin',
+          name: 'admin',
+          component: () => import('../views/Admin.vue'),
+          meta: {
+            name: '管理员信息'
+          }
+        }
       ]
     },
     {

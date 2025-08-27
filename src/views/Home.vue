@@ -1,37 +1,69 @@
 <template>
-    <div>
-        <div class="card" style="margin-bottom: 5px;">
-            <el-input style="width: 260px; margin-left: 5px;" v-model="date.name" placeholder="请输入内容"
-                prefix-icon="Search"></el-input>
-            <el-button type="primary" style="margin-left: 5px;">查询</el-button>
-        </div>
-        
-        <div class="card">
-            <el-button type="primary" style="margin-left: 5px;">新增</el-button>
-            <el-button type="danger" style="margin-left: 5px;">批量删除</el-button>
-            <el-button type="success" style="margin-left: 5px;">批量导出</el-button>
-            <el-button type="info" style="margin-left: 5px;">批量导入</el-button>
-        </div>
+    <div class="home-container">
+        <el-card class="welcome-card" shadow="never">
+            <h1 class="welcome-title">欢迎使用管理系统！</h1>
+            <p class="welcome-text">在这里，您可以轻松管理系统中作者和用户信息。祝您工作愉快！</p>
+        </el-card>
 
-        <div class="card" style="margin-bottom: 5px;">
-            <el-table :data="date.tableData" style="width: 100%;">
-                <el-table-column type="selection" width="180px"></el-table-column>
-                <el-table-column prop="data" label="姓名" width="180px"></el-table-column>
-                <el-table-column prop="name" label="手机号" width="180px"></el-table-column>
-                <el-table-column prop="adress" label="地址" width="180px"></el-table-column>
-            </el-table>
-        </div>
+        <el-row :gutter="20" class="stats-card-row">
+            <el-col :span="8">
+                <el-card class="stats-card" shadow="hover">
+                    <div class="card-icon-wrapper bg-blue">
+                        <el-icon><Collection /></el-icon>
+                    </div>
+                    <div class="card-content">
+                        <div class="stats-title">用户总量</div>
+                        <div class="stats-number">{{ totalBooks }}</div>
+                    </div>
+                </el-card>
+            </el-col>
+            <el-col :span="8">
+                <el-card class="stats-card" shadow="hover">
+                    <div class="card-icon-wrapper bg-green">
+                        <el-icon><User /></el-icon>
+                    </div>
+                    <div class="card-content">
+                        <div class="stats-title">用户总数</div>
+                        <div class="stats-number">{{ totalUsers }}</div>
+                    </div>
+                </el-card>
+            </el-col>
+            <el-col :span="8">
+                <el-card class="stats-card" shadow="hover">
+                    <div class="card-icon-wrapper bg-orange">
+                        <el-icon><Avatar /></el-icon>
+                    </div>
+                    <div class="card-content">
+                        <div class="stats-title">作者数量</div>
+                        <div class="stats-number">{{ totalAuthors }}</div>
+                    </div>
+                </el-card>
+            </el-col>
+        </el-row>
+        
     </div>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { ref, onMounted } from 'vue';
+import { Collection, User, Avatar } from '@element-plus/icons-vue';
 
-const date = reactive({
-    name: '',
-    tableData: [
-        { data: '王小虎', name: '12345678901', adress: '上海' },
-        { data: '王小虎', name: '12345678901', adress: '上海' },   
-    ]
-})
+const totalBooks = ref(0);
+const totalUsers = ref(0);
+const totalAuthors = ref(0);
+const fetchStatsData = () => {
+    setTimeout(() => {
+        totalBooks.value = Math.floor(Math.random() * 1000) + 500;
+        totalUsers.value = Math.floor(Math.random() * 200) + 50;
+        totalAuthors.value = Math.floor(Math.random() * 100) + 20;
+    }, 500);
+};
+
+onMounted(() => {
+    fetchStatsData();
+});
 </script>
+
+<style scoped>
+@import '@/assets/css/home.css';
+</style>
