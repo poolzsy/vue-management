@@ -18,7 +18,7 @@
                         </el-button>
                         <template #dropdown>
                             <el-dropdown-menu>
-                                <el-dropdown-item :icon="Download">批量导出</el-dropdown-item>
+                                <el-dropdown-item :icon="Download" @click="exportData">批量导出</el-dropdown-item>
                                 <el-dropdown-item :icon="Upload">批量导入</el-dropdown-item>
                             </el-dropdown-menu>
                         </template>
@@ -249,6 +249,10 @@ const handlePageChange = (val) => {
 
 const handleSelectionChange = (selection) => {
     multipleSelection.value = selection;
+};
+
+const exportData = () => { 
+     request.get('/admin/export').then(res => {});
 };
 </script>
 
