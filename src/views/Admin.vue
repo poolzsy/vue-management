@@ -6,7 +6,7 @@
                 <div class="search-area">
                     <el-input v-model="params.name" placeholder="请输入姓名" prefix-icon="Search" clearable />
                     <el-button type="primary" :icon="Search" @click="handleSearch">查询</el-button>
-                    <el-button type="danger" :icon="Refresh" @click="handleClear">清空</el-button>
+                    <el-button :icon="Refresh" @click="handleClear">清空</el-button>
                 </div>
 
                 <div class="action-area">
@@ -42,7 +42,7 @@
                 </el-table-column>
             </el-table>
 
-            <!-- 分页组件：放置在表格下方居中 -->
+            <!-- 分页组件 -->
             <div class="pagination-container">
                 <el-pagination background :current-page="params.pageNum" :page-size="params.pageSize"
                     :page-sizes="[5, 10, 15, 20]" layout="total, sizes, prev, pager, next, jumper" :total="params.total"
@@ -51,25 +51,25 @@
         </div>
 
         <!-- 新增/编辑对话框 -->
-        <el-dialog v-model="dialog.visible" :title="dialog.title" width="30%">
-            <el-form :model="form" label-width="80px">
-                <el-form-item label="账号">
-                    <el-input v-model="form.username" />
+        <el-dialog v-model="dialog.visible" :title="dialog.title" width="40%" @close="resetForm">
+            <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+                <el-form-item label="账号" prop="username">
+                    <el-input v-model="form.username" :disabled="!!form.id" placeholder="请输入账号" />
                 </el-form-item>
-                <el-form-item label="姓名">
-                    <el-input v-model="form.name" />
+                <el-form-item label="姓名" prop="name">
+                    <el-input v-model="form.name" placeholder="请输入姓名" />
                 </el-form-item>
-                <el-form-item label="手机号">
-                    <el-input v-model="form.phone" />
+                <el-form-item label="手机号" prop="phone">
+                    <el-input v-model="form.phone" placeholder="请输入手机号" />
                 </el-form-item>
-                <el-form-item label="邮箱">
-                    <el-input v-model="form.email" />
+                <el-form-item label="邮箱" prop="email">
+                    <el-input v-model="form.email" placeholder="请输入邮箱" />
                 </el-form-item>
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="dialog.visible = false">取消</el-button>
-                    <el-button type="primary" @click="handleSave">确定</el-button>
+                    <el-button type="primary" @click="submitForm">确定</el-button>
                 </span>
             </template>
         </el-dialog>
@@ -78,9 +78,7 @@
 
 <script setup>
 import { reactive, ref } from 'vue';
-import {
-    Search, Plus, Delete, Download, Upload, ArrowDown, Refresh
-} from '@element-plus/icons-vue';
+import {Search, Plus, Delete, Download, Upload, ArrowDown, Refresh} from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import request from '@/utils/request';
 
@@ -96,43 +94,138 @@ const params = reactive({
     total: 0
 });
 
-const multipleTableRef = ref(null)
-const multipleSelection = ref([])
+const dialog = reactive({
+    visible: false,
+    title: ''
+});
 
-const form = reactive({
+const form = ref({
+    id: null,
     username: '',
     name: '',
     phone: '',
     email: ''
 });
 
-const dialog = reactive({
-    visible: false,
-    title: ''
+const multipleTableRef = ref(null);
+const multipleSelection = ref([]);
+const formRef = ref(null);
+
+// --- 表单校验规则 ---
+const rules = reactive({
+    username: [
+        { required: true, message: '账号不能为空', trigger: 'blur' },
+    ],
+    name: [
+        { required: true, message: '姓名不能为空', trigger: 'blur' },
+    ],
+    phone: [
+        { required: true, message: '手机号不能为空', trigger: 'blur' },
+        { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
+    ],
+    email: [
+        { message: '邮箱不能为空', trigger: 'blur' },
+        { type: 'email', message: '请输入正确的邮箱格式', trigger: ['blur', 'change'] }
+    ]
 });
 
-// --- 加载数据 ---
 const load = () => {
     data.loading = true;
     request.get('/admin/selectPage', { params }).then(res => {
-        data.tableData = res.data.rows;
-        params.total = res.data.total;
+        if (res.code === 200) {
+            data.tableData = res.data.rows;
+            params.total = res.data.total;
+        } else {
+            ElMessage.error(res.msg || '数据加载失败');
+        }
+    }).finally(() => {
         data.loading = false;
     });
 };
+load();
 
-// --- 分页处理 ---
-const handleSizeChange = (val) => {
-    params.pageSize = val;
-    load();
+const resetForm = () => {
+    form.value = { id: null, username: '', name: '', phone: '', email: '' };
+    formRef.value?.clearValidate();
 };
 
-const handlePageChange = (val) => {
-    params.pageNum = val;
-    load();
+const openCreateDialog = () => {
+    resetForm();
+    dialog.title = '新增管理员';
+    dialog.visible = true;
 };
 
-// --- 搜索和清空 ---
+const openEditDialog = (row) => {
+    resetForm();
+    form.value = { ...row };
+    dialog.title = '编辑管理员';
+    dialog.visible = true;
+};
+
+const submitForm = async () => {
+    if (!formRef.value) return;
+    try {
+        await formRef.value.validate();
+
+        const requestPromise = form.value.id
+            ? request.put('/admin/update', form.value)
+            : request.post('/admin/save', form.value);
+
+        const res = await requestPromise;
+        if (res.code === 200) {
+            ElMessage.success(form.value.id ? '更新成功' : '新增成功');
+            dialog.visible = false;
+            load();
+        } else {
+            ElMessage.error(res.msg || '操作失败');
+        }
+    } catch (error) {
+        console.error('Validation or request failed:', error);
+    }
+};
+
+const handleDelete = (row) => {
+    ElMessageBox.confirm(`确定删除管理员 [${row.name}] 吗?`, '危险操作', {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(async () => {
+        const res = await request.delete('/admin/delete/' + row.id);
+        if (res.code === 200) {
+            ElMessage.success('删除成功');
+            load();
+        } else {
+            ElMessage.error(res.msg || '删除失败');
+        }
+    }).catch(() => {
+        ElMessage.info('已取消删除');
+    });
+};
+
+const handleBatchDelete = () => {
+    if (multipleSelection.value.length === 0) {
+        ElMessage.warning('请至少选择一项进行删除');
+        return;
+    }
+    ElMessageBox.confirm('确定批量删除选中的管理员吗?', '危险操作', {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(async () => {
+        const ids = multipleSelection.value.map(item => item.id);
+        const res = await request.post('/admin/deleteBatch', ids);
+        if (res.code === 200) {
+            ElMessage.success('批量删除成功');
+            load();
+            multipleTableRef.value.clearSelection();
+        } else {
+            ElMessage.error(res.msg || '批量删除失败');
+        }
+    }).catch(() => {
+        ElMessage.info('已取消批量删除');
+    });
+};
+
 const handleSearch = () => {
     params.pageNum = 1;
     load();
@@ -144,70 +237,19 @@ const handleClear = () => {
     load();
 };
 
-// --- 新增 ---
-const openCreateDialog = () => {
-    Object.assign(form, { id: null, username: '', name: '', phone: '', email: '' });
-    dialog.title = '新增管理员';
-    dialog.visible = true;
+const handleSizeChange = (val) => {
+    params.pageSize = val;
+    load();
 };
 
-// --- 编辑 ---
-const openEditDialog = (row) => {
-    Object.assign(form, row);
-    dialog.title = '编辑管理员';
-    dialog.visible = true;
-};
-
-// --- 保存 ---
-const handleSave = () => {
-    request.post('/admin/save', form).then(res => {
-        ElMessage.success('保存成功');
-        dialog.visible = false;
-        load(); // 刷新数据
-    });
-};
-
-// --- 删除 ---
-const handleDelete = (row) => {
-    ElMessageBox.confirm('确定删除该管理员吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-    }).then(() => {
-        request.delete('/admin/delete/' + row.id).then(res => {
-            ElMessage.success('删除成功');
-            load();
-
-        });
-    }).catch(() => {
-    });
+const handlePageChange = (val) => {
+    params.pageNum = val;
+    load();
 };
 
 const handleSelectionChange = (selection) => {
-    multipleSelection.value = selection
-}
-const handleBatchDelete = () => {
-    if (multipleSelection.value.length === 0) {
-        ElMessage.warning('请选择要删除的管理员');
-        return;
-    }
-
-    ElMessageBox.confirm('确定批量删除这些管理员吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-    }).then(() => {
-        const ids = multipleSelection.value.map(item => item.id);
-        request.post('/admin/deleteBatch', ids).then(res => {
-            ElMessage.success('批量删除成功');
-            load(); // 刷新数据
-            multipleTableRef.value.clearSelection()
-        });
-    }).catch(() => {
-    });
+    multipleSelection.value = selection;
 };
-
-load();
 </script>
 
 <style lang="scss" scoped>
