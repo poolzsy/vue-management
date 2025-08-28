@@ -22,7 +22,7 @@
                         <el-dropdown-menu>
                             <el-dropdown-item>个人信息</el-dropdown-item>
                             <el-dropdown-item>修改密码</el-dropdown-item>
-                            <el-dropdown-item>退出登录</el-dropdown-item>
+                            <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
@@ -62,6 +62,21 @@
 
 <script setup>
 import router from "@/router/index.js";
+
+const logout = () => {
+    localStorage.removeItem("code_user");
+    router.push("/login");
+};
+
+const userStr = localStorage.getItem("code_user");
+if(userStr){
+    const user = JSON.parse(userStr);
+    if(!user.id){
+        router.push("/login");
+    }
+}else{ 
+    router.push("/login");
+}
 </script>
 
 <style lang="scss" scoped>
