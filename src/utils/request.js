@@ -16,19 +16,29 @@ request.interceptors.request.use(
         return Promise.reject(error);
     }
 );
+
 // response拦截器
 request.interceptors.response.use(
     response => {
+        if (response.data instanceof Blob) {
+            return response.data;
+        }
         const res = response.data;
         if (res.code !== 200) {
-            ElMessage.error(res.message || 'Error');
-            return Promise.reject(new Error(res.message || 'Error'));
+            ElMessage.error(res.msg || res.message || '操作失败');
+            return Promise.reject(new Error(res.msg || res.message || 'Error'));
         } else {
             return res;
         }
     },
     error => {
-        ElMessage.error(error.message);
+        if (error.response) {
+            ElMessage.error(`请求失败: ${error.response.status} ${error.response.statusText}`);
+        } else if (error.request) {
+            ElMessage.error('请求超时或网络连接问题');
+        } else {
+            ElMessage.error(`发生错误: ${error.message}`);
+        }
         return Promise.reject(error);
     }
 

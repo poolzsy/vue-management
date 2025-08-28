@@ -19,7 +19,7 @@
                         <template #dropdown>
                             <el-dropdown-menu>
                                 <el-dropdown-item :icon="Download" @click="exportData">批量导出</el-dropdown-item>
-                                <el-dropdown-item :icon="Upload">批量导入</el-dropdown-item>
+                                <el-dropdown-item :icon="Upload" @click="openImportDialog">批量导入</el-dropdown-item>
                             </el-dropdown-menu>
                         </template>
                     </el-dropdown>
@@ -73,14 +73,33 @@
                 </span>
             </template>
         </el-dialog>
+
+        <!-- 批量导入对话框 -->
+        <el-dialog v-model="importDialog.visible" title="批量导入管理员" width="30%">
+            <el-upload ref="uploadRef" :action="importDialog.uploadUrl" :on-success="handleUploadSuccess"
+                :on-error="handleUploadError" :limit="1" :auto-upload="true" :show-file-list="true"
+                accept=".xlsx, .xls">
+                <template #trigger>
+                    <el-button type="primary">选取文件</el-button>
+                </template>
+            </el-upload>
+            <template #footer>
+                <div class="dialog-footer">
+                    <el-link type="primary" :href="importDialog.templateUrl" class="template-link"
+                        target="_blank">下载模板</el-link>
+                    <el-button @click="importDialog.visible = false">关闭</el-button>
+                </div>
+            </template>
+        </el-dialog>
     </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
-import {Search, Plus, Delete, Download, Upload, ArrowDown, Refresh} from '@element-plus/icons-vue';
+import { reactive, ref, computed } from 'vue';
+import { Search, Plus, Delete, Download, Upload, ArrowDown, Refresh } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import request from '@/utils/request';
+import FileSaver from 'file-saver';
 
 const data = reactive({
     loading: false,
@@ -107,11 +126,17 @@ const form = ref({
     email: ''
 });
 
+const importDialog = reactive({
+    visible: false,
+    uploadUrl: computed(() => `${request.defaults.baseURL}/admin/import`),
+    templateUrl: computed(() => `${request.defaults.baseURL}/admin/import/template`)
+});
+
 const multipleTableRef = ref(null);
 const multipleSelection = ref([]);
 const formRef = ref(null);
+const uploadRef = ref(null);
 
-// --- 表单校验规则 ---
 const rules = reactive({
     username: [
         { required: true, message: '账号不能为空', trigger: 'blur' },
@@ -132,12 +157,10 @@ const rules = reactive({
 const load = () => {
     data.loading = true;
     request.get('/admin/selectPage', { params }).then(res => {
-        if (res.code === 200) {
-            data.tableData = res.data.rows;
-            params.total = res.data.total;
-        } else {
-            ElMessage.error(res.msg || '数据加载失败');
-        }
+        data.tableData = res.data.rows;
+        params.total = res.data.total;
+    }).catch(err => {
+        console.error("数据加载失败:", err);
     }).finally(() => {
         data.loading = false;
     });
@@ -171,16 +194,12 @@ const submitForm = async () => {
             ? request.put('/admin/update', form.value)
             : request.post('/admin/save', form.value);
 
-        const res = await requestPromise;
-        if (res.code === 200) {
-            ElMessage.success(form.value.id ? '更新成功' : '新增成功');
-            dialog.visible = false;
-            load();
-        } else {
-            ElMessage.error(res.msg || '操作失败');
-        }
+        await requestPromise;
+        ElMessage.success(form.value.id ? '更新成功' : '新增成功');
+        dialog.visible = false;
+        load();
     } catch (error) {
-        console.error('Validation or request failed:', error);
+        console.log('表单提交或验证失败');
     }
 };
 
@@ -190,13 +209,9 @@ const handleDelete = (row) => {
         cancelButtonText: '取消',
         type: 'warning'
     }).then(async () => {
-        const res = await request.delete('/admin/delete/' + row.id);
-        if (res.code === 200) {
-            ElMessage.success('删除成功');
-            load();
-        } else {
-            ElMessage.error(res.msg || '删除失败');
-        }
+        await request.delete('/admin/delete/' + row.id);
+        ElMessage.success('删除成功');
+        load();
     }).catch(() => {
         ElMessage.info('已取消删除');
     });
@@ -213,14 +228,10 @@ const handleBatchDelete = () => {
         type: 'warning'
     }).then(async () => {
         const ids = multipleSelection.value.map(item => item.id);
-        const res = await request.post('/admin/deleteBatch', ids);
-        if (res.code === 200) {
-            ElMessage.success('批量删除成功');
-            load();
-            multipleTableRef.value.clearSelection();
-        } else {
-            ElMessage.error(res.msg || '批量删除失败');
-        }
+        await request.post('/admin/deleteBatch', ids);
+        ElMessage.success('批量删除成功');
+        load();
+        multipleTableRef.value.clearSelection();
     }).catch(() => {
         ElMessage.info('已取消批量删除');
     });
@@ -251,9 +262,64 @@ const handleSelectionChange = (selection) => {
     multipleSelection.value = selection;
 };
 
-const exportData = () => { 
-     request.get('/admin/export').then(res => {});
+const exportData = async () => {
+    if (multipleSelection.value.length === 0) {
+        ElMessageBox.confirm('您没有选择任何数据，是否要导出全部数据？', '导出确认', {
+            confirmButtonText: '导出全部',
+            cancelButtonText: '取消',
+            type: 'info'
+        }).then(() => {
+            const baseURL = request.defaults.baseURL;
+            window.open(`${baseURL}/admin/export`);
+            ElMessage.success('正在准备导出全部数据...');
+        }).catch(() => {
+            ElMessage.info('已取消导出');
+        });
+        return;
+    }
+
+    const ids = multipleSelection.value.map(item => item.id);
+    try {
+        const blob = await request.post('/admin/export/selected', ids, {
+            responseType: 'blob'
+        });
+        FileSaver.saveAs(blob, `管理员信息_${new Date().getTime()}.xlsx`);
+    } catch (error) {
+        console.error('导出失败:', error);
+        ElMessage.error('导出失败，请稍后重试');
+    }
 };
+
+const openImportDialog = () => {
+    importDialog.visible = true;
+    uploadRef.value?.clearFiles();
+};
+
+const handleUploadSuccess = (response) => {
+    ElMessage.success(response || '导入成功');
+    importDialog.visible = false;
+    load();
+};
+
+
+const handleUploadError = (error) => {
+    console.error('Upload Error Original:', error);
+    try {
+        const response = JSON.parse(error.message);
+        const detailMessage = response.msg || response.message;
+        if (detailMessage) {
+            ElMessageBox.alert(detailMessage, '导入错误', {
+                dangerouslyUseHTMLString: true, // 允许渲染 <br> 换行
+                confirmButtonText: '确定'
+            });
+        } else {
+             ElMessage.error('导入失败，服务器返回未知错误格式');
+        }
+    } catch (e) {
+        ElMessage.error('文件上传失败，请检查网络或联系管理员');
+    }
+};
+
 </script>
 
 <style lang="scss" scoped>
@@ -295,5 +361,16 @@ const exportData = () => {
     display: flex;
     justify-content: center;
     margin-top: 20px;
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+}
+
+.template-link {
+    margin-right: auto;
 }
 </style>
