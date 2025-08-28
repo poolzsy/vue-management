@@ -48,6 +48,7 @@
                             <span>用户管理</span>
                         </template>
                         <el-menu-item index="/admin">管理员列表</el-menu-item>
+                        <el-menu-item index="/user">普通用户列表</el-menu-item>
                     </el-sub-menu>
                 </el-menu>
             </aside>

@@ -24,6 +24,14 @@ const router = createRouter({
           meta: {
             name: '管理员信息'
           }
+        },
+        {
+          path: 'user',
+          name: 'user',
+          component: () => import('../views/User.vue'),
+          meta: {
+            name: '用户信息'
+          }
         }
       ]
     },
