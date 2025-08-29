@@ -75,10 +75,6 @@ const userStr = localStorage.getItem("code_user");
 const data = reactive({
     user: JSON.parse(userStr || "{}")
 });
-
-if (!data.user?.id) {
-    router.push("/login");
-}
 </script>
 
 <style lang="scss" scoped>
