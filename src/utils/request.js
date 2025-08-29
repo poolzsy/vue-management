@@ -3,10 +3,13 @@ import { ElMessage } from 'element-plus';
 
 const request = axios.create({
     baseURL: 'http://localhost:9090',
-    timeout: 5000
+    timeout: 5000,
+    validateStatus: function (status) {
+        return status >= 200 && status < 510;
+    }
 });
 
-// request拦截器
+// request 拦截器
 request.interceptors.request.use(
     config => {
         config.headers['Content-Type'] = 'application/json;charset=UTF-8';
@@ -17,31 +20,42 @@ request.interceptors.request.use(
     }
 );
 
-// response拦截器
+// response 拦截器
 request.interceptors.response.use(
     response => {
         if (response.data instanceof Blob) {
-            return response.data;
+            return response;
         }
+
         const res = response.data;
-        if (res.code !== 200) {
-            ElMessage.error(res.msg || res.message || '操作失败');
-            return Promise.reject(new Error(res.msg || res.message || 'Error'));
-        } else {
+        const httpStatus = response.status;
+
+        if (res.code === 200) {
             return res;
         }
-    },
-    error => {
-        if (error.response) {
-            ElMessage.error(`请求失败: ${error.response.status} ${error.response.statusText}`);
-        } else if (error.request) {
-            ElMessage.error('请求超时或网络连接问题');
-        } else {
-            ElMessage.error(`发生错误: ${error.message}`);
+
+        ElMessage({
+            message: res.message || '操作失败',
+            type: 'error',
+            duration: 3 * 1000
+        });
+
+        if (httpStatus === 401) {
+            console.error('认证失败，请重新登录');
         }
+
+        return Promise.reject(new Error(res.message || 'Error'));
+    },
+
+    error => {
+        console.error('网络请求错误:', error);
+        ElMessage({
+            message: '网络连接异常或服务器无响应，请稍后重试',
+            type: 'error',
+            duration: 5 * 1000
+        });
         return Promise.reject(error);
     }
-
-)
+);
 
 export default request;

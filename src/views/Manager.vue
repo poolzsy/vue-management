@@ -16,7 +16,7 @@
                     <div class="user-info">
                         <img class="user-avatar"
                             src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" alt="Avatar" />
-                        <span>管理员</span>
+                        <span>{{ data.user?.name }}</span>
                     </div>
                     <template #dropdown>
                         <el-dropdown-menu>
@@ -63,6 +63,7 @@
 
 <script setup>
 import router from "@/router/index.js";
+import { reactive } from "vue";
 
 const logout = () => {
     localStorage.removeItem("code_user");
@@ -70,12 +71,12 @@ const logout = () => {
 };
 
 const userStr = localStorage.getItem("code_user");
-if(userStr){
-    const user = JSON.parse(userStr);
-    if(!user.id){
-        router.push("/login");
-    }
-}else{ 
+
+const data = reactive({
+    user: JSON.parse(userStr || "{}")
+});
+
+if (!data.user?.id) {
     router.push("/login");
 }
 </script>

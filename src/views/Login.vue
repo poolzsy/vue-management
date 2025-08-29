@@ -22,6 +22,12 @@
                     <el-input v-model="form.password" prefix-icon="Lock" placeholder="密码" size="large" show-password
                         clearable />
                 </el-form-item>
+                <el-form-item prop="role">
+                    <el-select v-model="form.role" placeholder="请选择角色" size="large">
+                        <el-option label="管理员" value="admin"></el-option>
+                        <el-option label="用户" value="user"></el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item>
                     <el-button type="primary" size="large" class="login-button" :loading="loading" @click="handleLogin">
                         {{ loading ? '登录中...' : '登 录' }}
@@ -49,7 +55,8 @@ const loading = ref(false);
 
 const form = reactive({
     username: 'admin',
-    password: '123456'
+    password: '123456',
+    role: 'admin'
 });
 
 const rules = reactive({
@@ -74,24 +81,18 @@ const handleLogin = async () => {
 
         const res = await request.post('/login', form);
 
-        if (res.code === 200) {
-            ElMessage.success('登录成功');
-            console.log(res);
-            localStorage.setItem("code_user", JSON.stringify(res.data || {}));
-            router.push('/');
-        } else {
-            ElMessage.error(res.msg || '登录失败，请检查用户名或密码');
-        }
+        ElMessage.success('登录成功');
+        localStorage.setItem("code_user", JSON.stringify(res.data || {}));
+        router.push('/');
     } catch (error) {
         console.error('Login failed:', error);
-        ElMessage.error('登录失败，请稍后重试');
     } finally {
         loading.value = false;
     }
 };
 
 const handleRegister = () => {
-    ElMessage.info('注册功能暂未开放，敬请期待！');
+    router.push('/register');
 };
 </script>
 
